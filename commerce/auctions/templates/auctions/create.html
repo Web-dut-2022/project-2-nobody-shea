@@ -1,0 +1,74 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Create Auction</h2>
+    <form action="{% url 'create_listing' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="title" placeholder="Name" style="width: 50%;">
+        </div>
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="description" placeholder="Description" style="width: 50%;">
+        </div>
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="startingBid" placeholder="Starting Bid" style="width: 50%;">
+        </div>
+        <div class="form-group">
+            <div class="form-control" style="width: 50%;"> 
+                <label id="upload" for="uploadimg" style="position: relative; width: auto; color: #6c757d;">Upload Image File for Auction</label>
+                <input href="javascript:void(0);" autofocus id="uploadimg" type="file" name="image" accept="image/png,image/jpg,image/jpeg,image/bmp,image/gif" onchange="imgPreview()"  style="opacity: 0; position: absolute; width: auto;" >   
+                <script src="http://code.jquery.com/jquery-latest.js"></script>
+                <script> 
+                    function imgPreview()
+                    {
+                        /*由于浏览器的安全机制，下面得到的是C:\fakepath\xxx
+                        var imgURL =document.getElementById("uploadimg").value;
+                        折腾了好多办法一直获取不了真实本地路径，现改用显示文件名+图像预览的方式
+                        */
+
+                        var imgfile = document.getElementById('uploadimg').files[0];
+                        console.log(imgfile);
+           
+                        var label = document.getElementById('upload');
+                        label.innerHTML = getName();
+                        label.style.color = "#000"; 
+
+                        var img = document.getElementById('preview');
+                        img.src = getURL(imgfile); 
+                        img.style.opacity = 1;
+
+                        var div = document.getElementById('previewdiv');
+                        div.style.height = "auto";
+                        div.style.marginBottom = "1rem";
+                    }
+
+                    //这样也获取不了真实路径，只是生成一个临时Blob路径用以图片预览
+                    function getURL(file) {
+                        var url = "";
+                        if(window.createObjectURL != undefined) {
+                                url = window.createObjectURL(file);
+                        } else if(window.URL != undefined) {
+                                url = window.URL.createObjectURL(file);
+                        } else if(window.webkitURL != undefined) {
+                                url = window.webkitURL.createObjectURL(file);
+                        }
+                        return url;
+                    }
+
+                    function getName(){
+                        var name = "";
+                        var str =document.getElementById("uploadimg").value;
+                        var pos=str.lastIndexOf("\\");
+                        name = str.substring(pos+1);
+                        return name;
+                    }
+                </script> 
+            </div>
+        </div>
+        <div id="previewdiv" style="height: 0;">
+            <img src="" id="preview" style="opacity:0; max-width: 300px;max-height: 400px;"> 
+        </div>
+        <input class="btn btn-primary" type="submit" value="Create" />
+    </form>
+
+{% endblock %}
