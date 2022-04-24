@@ -1,0 +1,102 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <style>
+        .inline{display: inline-block;}
+        .leftblank{margin-left: 20px;}
+        .btn_watch{height: 24px; padding: 0 5px; color: #FFF; line-height: 15px; font-size: 16px; font-weight: 600;}
+        .add{background-color: lightgreen; border-color: lightgreen;}
+        .remove{background-color: lightslategray; border-color: lightslategray ;}
+        .imgminsize{min-height: 300px; min-width: 400;}
+        .btn_bid_comment{width: 100px; margin-left: 30px; vertical-align: top;}
+        .price{margin-bottom: 10px; font-size: 28px;}
+    </style>
+    <div class="inline">
+        <h3>
+            Listing: {{data.title}}
+            {% if data.active %}
+            {% else %}
+                <span style="color: red;"> CLOSED! </span>
+            {% endif %}
+        </h3>
+    </div>
+    {% if data.active %}
+        {% if user.is_authenticated %}
+            <div class="inline leftblank""> 
+                <form action="/add_watchlist/{{ data.id }}">
+                    {% if added %}
+                        <input class="btn btn_watch remove" type="submit" value="Remove from Watchlist" />
+                        {% else %}
+                        <input class="btn btn_watch add" type="submit" value="Add to Watchlist" />
+                    {% endif %}
+                </form>
+            </div>
+            <div class="inline leftblank""> 
+            {% if creator %}
+                <form action="/close_listing/{{ data.id }}">
+                    <input class="btn btn_watch remove" type="submit" value="Close Listing" />
+                </form>
+            {% endif %}
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <div class="leftblank">
+        <div style="margin-top: 20px;"><img class="imgminsize" src="{{ data.imgURL }}" alt="{{ data.title }}"/> </div>
+        <div style="margin:20px 0;">{{ data.description }}</div>
+        {% if data.active %}
+            <div class="price"><strong>Current Price: ${% firstof data.highest_bid|floatformat:"2" data.price %}</strong></div>
+            {% if user.is_authenticated %}
+            <form action="{% url 'add_bid' data.id %}" method="POST">
+                {% csrf_token %}
+                    <div class="form-group inline">
+                        <input autofocus class="form-control" type="number" min={{data.price}} name="price" required style="width: 500px"/>
+                    </div>
+                    <input class="btn btn-primary btn_bid_comment"  type="submit" value="Place  Bid" />
+            </form>
+                {% else %}
+                <p class="card-text">Please <em><a href="{% url 'login' %}">Log In</a></em> to Bid.</p>
+            {% endif %}
+            {% else %}
+            <div class="price"><strong>Auction Price: ${% firstof data.highest_bid|floatformat:"2" data.price %}</strong></div>
+            <div class="price"><strong>Winner: {{ winner }}</strong></div>
+        {% endif %}
+    </div>
+
+    <div class="leftblank">
+        <div>
+            <h3 class="text-primary">Comments</h3>
+            {% for comment in comments %}
+                <div>
+                    <h5 class="inline" style="color: gray;">{{ comment.uid }}</h5>
+                    <span class="text-muted inline leftblank"><small>{{ comment.timestamp }}</small></span>
+                    <p>{{ comment.content }}</p>
+                </div>
+            {% empty %}
+                <p>No comments yet.</p>
+            {% endfor %}
+        </div>
+        {% if data.active %}
+            {% if user.is_authenticated %}
+            <form action="{% url 'add_comment' data.id %}" method="POST">
+                {% csrf_token %} 
+                <div class="form-group inline">
+                    <input autofocus class="form-control" type="text" placeholder="Leave your Comment..." name="content" required style="width: 500px"/>
+                </div>       
+                    <input class="btn btn-primary btn_bid_comment" type="submit" value="Comment"/>
+            </form>
+                {% else %}
+                <p class="card-text">Please <em><a href="{% url 'login' %}">Log In</a></em> to Comment.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 20px;">
+        <ul>
+            <li>Listed by: <em>{{ data.uid }}</em></li>
+            <li>Category: <em>{{ data.category|capfirst }}</em></li>
+            <li>Listed on: <em>{{ data.timestamp|date:"F j Y, h:i a" }}</em></li>
+        </ul>
+    </div>
+
+{% endblock %}

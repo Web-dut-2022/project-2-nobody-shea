@@ -1,0 +1,31 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>{{ Active }} Listings</h2>
+
+    <style>
+        .RoundedRectangle{display: flex; width: 100%; border: 1.5px solid gray; border-radius: 10px; max-height: 250px;}
+        .images{max-height: 210px;  max-width: 360px;}
+        .surBlank{padding: 20px; display: inline-block; vertical-align: top;}
+        .info{font-size: 20px; margin: 15px 0 20px 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow:hidden; text-overflow:ellipsis ;} 
+    </style>
+    {% for auction in data %}
+        <div style="padding: 5px;display: flex;" onclick="window.location.href='/listings/{{auction.id}}'">
+        <div class="RoundedRectangle">
+            <div class="surBlank">
+                <img class="images" src="{{ auction.imgURL }}" alt="{{ auction.title }}"/> 
+            </div>
+            <div class="surBlank">
+                <div>
+                    <h4>{{ auction.title }}</h4>
+                    <p class="info">
+                        <span style="font-weight: 650;">Price: </span>
+                        ${% firstof auction.highest_bid|floatformat:"2" auction.price %}
+                    </p>
+                    <p class="info">{{ auction.description }}</p>                 
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}
